@@ -57,26 +57,36 @@ cada integración solo se activa si el programa está instalado (`config/zsh/qol
 
 ## Instalación
 
-Pensado para **Fedora 44 con Hyprland 0.56+** (la configuración usa la API Lua).
+Pensado para una **Fedora 44 recién instalada** (Hyprland 0.56+, la configuración usa la API Lua).
 
 ```bash
 git clone https://github.com/CristianAlCubo/FedoraRice.git
 cd FedoraRice
-./install.sh --packages      # --packages instala dependencias con dnf (pide sudo); sin él, solo copia configs
+./install.sh --system
 ```
 
-El script **respalda** lo que sustituye en `~/.config-backup-<fecha>/`, reescribe las rutas a tu `$HOME`,
-instala las fuentes (Rubik y FiraCode Nerd Font Mono) y crea el comando `rice-theme`.
-**No toca tu `~/.zshrc`**: deja el del rice en `~/.zshrc.rice` para que lo compares.
+Un solo comando deja el sistema como en las capturas. **Sin `--system`** hace todo lo que no necesita sudo.
 
-Aparte, a mano:
-- [oh-my-zsh](https://ohmyz.sh) y los plugins `zsh-autosuggestions` y `zsh-syntax-highlighting`.
-- [Starship](https://starship.rs) (`curl -sS https://starship.rs/install.sh | sh`).
-- Cursor **Bibata-Modern-Ice** e iconos **Papirus-Dark**.
-- Si usas el asistente o Spotify: rellena `~/.config/nexora/env` y `~/.config/hypr/spotify-api.json`
-  (se crean vacíos desde las plantillas `*.example`).
-- Fondo de pantalla: no se incluye; elígelo desde Ajustes (`Super+I`).
-- SDDM (opcional, requiere sudo): `sddm/install.sh`.
+| Paso | Qué hace | Necesita |
+|---|---|---|
+| Paquetes | Habilita el COPR `byte0/hyprland` e instala Hyprland, Quickshell, kitty, fzf, eza, zoxide, delta… (`packages/fedora.txt`) | `--system` (sudo) |
+| Shell | Pone zsh como shell por defecto | `--system` |
+| Configuración | Quickshell, Hyprland, rice/temas, kitty, zsh, Starship, fastfetch, git/delta; reescribe las rutas a tu `$HOME` | – |
+| `~/.zshrc` | Lo reemplaza por el del rice (con `--keep-zshrc` lo deja y guarda el nuevo en `~/.zshrc.rice`) | – |
+| Fuentes | Rubik y FiraCode Nerd Font Mono | – |
+| Fondos | Los 3 en uso (escritorio, bloqueo y login) en `~/Imágenes/Wallpapers` | – |
+| Terminal | oh-my-zsh, `zsh-autosuggestions`, `zsh-syntax-highlighting` (git clone) y Starship (binario de GitHub) | internet |
+| Cursor e iconos | Cursor Bibata-Modern-Ice (GitHub); Papirus-Dark viene en los paquetes; ajustes GTK/gsettings | internet |
+| Tema | Regenera los colores derivados del tema activo (`rice-theme`) | – |
+| SDDM | Tema de inicio de sesión (omitir con `--no-sddm`) | `--system` |
+
+Todo lo que sustituye se respalda en `~/.config-backup-<fecha>/`. Es seguro repetirlo, y si un paso de descarga falla avisa y continúa.
+
+**Lo que queda a mano**
+- **Monitores:** `config/hypr/hyprland.lua` define `DP-2` (2560×1440@144) y `DP-1`. Mira tus nombres con `hyprctl monitors` y ajústalos.
+- **Claves (opcionales):** `~/.config/nexora/env` (asistente con IA) y `~/.config/hypr/spotify-api.json` (búsqueda en Spotify). Se crean vacíos desde `templates/` y nunca se suben a git.
+- **Apps tuyas:** Spotify (snap), Steam, Docker, etc. El rice las usa si están instaladas.
+- Después, cierra sesión y entra en la sesión **Hyprland**.
 
 ## Mantener el repo al día
 
@@ -84,7 +94,7 @@ Aparte, a mano:
 ./sync.sh     # copia tu configuración viva al repo (sin secretos ni respaldos; rutas → @HOME@)
 git add -A && git commit -m "…" && git push
 ```
-`.gitignore` y `sync.sh` excluyen claves, estado local (`wallpaper.state`, `widgets.json`), el avatar y los `*.bak*`.
+`.gitignore` y `sync.sh` excluyen claves, estado local (`wallpaper.state`, `widgets.json`), el avatar y los `*.bak*`. Los fondos de `wallpapers/` se añaden a mano.
 
 ## Paneles (capturas)
 

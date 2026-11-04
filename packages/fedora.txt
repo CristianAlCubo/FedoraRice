@@ -1,9 +1,41 @@
-# Paquetes de Fedora usados por el rice (dnf). Hyprland 0.56+ con configuración Lua.
+# Paquetes de Fedora que usa el rice (./install.sh --system). Hyprland sale del COPR byte0/hyprland.
+# Escritorio
 hyprland
 hyprlock
 hyprpaper
+hyprpicker
+xdg-desktop-portal-hyprland
+xdg-desktop-portal-gtk
 quickshell
+qt6-qtmultimedia
+qt6-qt5compat
+mate-polkit
+sddm
+# Captura, medios y sistema
+grim
+slurp
+wf-recorder
+wl-clipboard
+playerctl
+brightnessctl
+cava
+libnotify
+pavucontrol
+pipewire
+wireplumber
+NetworkManager
+bluez
+ImageMagick
+ffmpeg-free
+jq
+curl
+git
+python3
+python3-pillow
+nautilus
+# Terminal
 kitty
+zsh
 fastfetch
 fzf
 zoxide
@@ -14,11 +46,5 @@ ripgrep
 git-delta
 tealdeer
 duf
-zsh
-grim
-slurp
-wl-clipboard
-playerctl
-brightnessctl
-python3-pillow
-jq
+# Temas e iconos
+papirus-icon-theme
