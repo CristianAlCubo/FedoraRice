@@ -1,0 +1,41 @@
+{
+  "id": "kanagawa",
+  "name": "Kanagawa",
+  "description": "Dark color scheme inspired by the famous painting.",
+  "colors": {
+    "base": "#1f1f28",
+    "bgDark": "#16161d",
+    "surface": "#2a2a37",
+    "text": "#dcd7ba",
+    "dim": "#727169",
+    "accent": "#7e9cd8",
+    "accent2": "#957fb8",
+    "cyan": "#7fb4ca",
+    "green": "#98bb6c",
+    "yellow": "#e6c384",
+    "orange": "#ffa066",
+    "red": "#e46876",
+    "ink": "#16161d",
+    "line": "#363646",
+    "selection": "#2d4f67",
+    "url": "#7fb4ca"
+  },
+  "ansi": [
+    "#2a2a37",
+    "#e46876",
+    "#98bb6c",
+    "#e6c384",
+    "#7e9cd8",
+    "#957fb8",
+    "#7fb4ca",
+    "#dcd7ba",
+    "#727169",
+    "#e46876",
+    "#98bb6c",
+    "#e6c384",
+    "#7e9cd8",
+    "#957fb8",
+    "#7fb4ca",
+    "#dcd7ba"
+  ]
+}

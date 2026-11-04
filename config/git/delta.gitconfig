@@ -1,0 +1,15 @@
+# Diffs de git con delta (incluido desde ~/.gitconfig). Quitar: borrar el [include] de ~/.gitconfig.
+[core]
+	pager = delta
+[interactive]
+	diffFilter = delta --color-only
+[delta]
+	navigate = true
+	line-numbers = true
+	dark = true
+	syntax-theme = ansi
+	hyperlinks = true
+[merge]
+	conflictstyle = zdiff3
+[diff]
+	colorMoved = default

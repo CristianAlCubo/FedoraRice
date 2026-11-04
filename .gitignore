@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.bak*
+*.pre-*
+spotify-api.json
+config/nexora/env
+wallpaper.state
+widgets.json
+hyprpaper.conf
+avatar.png

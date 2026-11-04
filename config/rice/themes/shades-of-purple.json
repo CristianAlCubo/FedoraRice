@@ -1,0 +1,41 @@
+{
+  "id": "shades-of-purple",
+  "name": "Shades of Purple",
+  "description": "Sweet purple theme.",
+  "colors": {
+    "base": "#2d2b55",
+    "bgDark": "#1e1e3f",
+    "surface": "#3a3868",
+    "text": "#f4f0ff",
+    "dim": "#a599e9",
+    "accent": "#b362ff",
+    "accent2": "#ff628c",
+    "cyan": "#9effff",
+    "green": "#3ad900",
+    "yellow": "#fad000",
+    "orange": "#ff9d00",
+    "red": "#ec3a37",
+    "ink": "#1e1e3f",
+    "line": "#4d4a8f",
+    "selection": "#5a4fa0",
+    "url": "#9effff"
+  },
+  "ansi": [
+    "#3a3868",
+    "#ec3a37",
+    "#3ad900",
+    "#fad000",
+    "#b362ff",
+    "#ff628c",
+    "#9effff",
+    "#f4f0ff",
+    "#a599e9",
+    "#ec3a37",
+    "#3ad900",
+    "#fad000",
+    "#b362ff",
+    "#ff628c",
+    "#9effff",
+    "#f4f0ff"
+  ]
+}

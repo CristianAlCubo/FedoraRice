@@ -1,0 +1,39 @@
+singleton Theme 1.0 Theme.qml
+Slider 1.0 Slider.qml
+Glyph 1.0 Glyph.qml
+Tile 1.0 Tile.qml
+Icon 1.0 Icon.qml
+PillSlider 1.0 PillSlider.qml
+Launcher 1.0 Launcher.qml
+Notifications 1.0 Notifications.qml
+Osd 1.0 Osd.qml
+TrayMenu 1.0 TrayMenu.qml
+Stats 1.0 Stats.qml
+StatCard 1.0 StatCard.qml
+Calendar 1.0 Calendar.qml
+TabHome 1.0 TabHome.qml
+TabMedia 1.0 TabMedia.qml
+TabSystem 1.0 TabSystem.qml
+TabAlerts 1.0 TabAlerts.qml
+Dashboard 1.0 Dashboard.qml
+QuickSettings 1.0 QuickSettings.qml
+FocusRing 1.0 FocusRing.qml
+RoundClip 1.0 RoundClip.qml
+Settings 1.0 Settings.qml
+Widgets 1.0 Widgets.qml
+Assistant 1.0 Assistant.qml
+Recorder 1.0 Recorder.qml
+RightPanel 1.0 RightPanel.qml
+Frame 1.0 Frame.qml
+Fused 1.0 Fused.qml
+singleton Cfg 1.0 Cfg.qml
+singleton Weather 1.0 Weather.qml
+ProfileCard 1.0 ProfileCard.qml
+WeatherCard 1.0 WeatherCard.qml
+Popouts 1.0 Popouts.qml
+singleton Apps 1.0 Apps.qml
+GameMode 1.0 GameMode.qml
+Toasts 1.0 Toasts.qml
+SessionMenu 1.0 SessionMenu.qml
+Anim 1.0 Anim.qml
+Ripple 1.0 Ripple.qml

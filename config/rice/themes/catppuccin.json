@@ -1,0 +1,41 @@
+{
+  "id": "catppuccin",
+  "name": "Catppuccin",
+  "description": "Soothing pastel theme for the high-spirited.",
+  "colors": {
+    "base": "#1e1e2e",
+    "bgDark": "#181825",
+    "surface": "#313244",
+    "text": "#cdd6f4",
+    "dim": "#7f849c",
+    "accent": "#89b4fa",
+    "accent2": "#cba6f7",
+    "cyan": "#89dceb",
+    "green": "#a6e3a1",
+    "yellow": "#f9e2af",
+    "orange": "#fab387",
+    "red": "#f38ba8",
+    "ink": "#181825",
+    "line": "#313244",
+    "selection": "#45475a",
+    "url": "#89dceb"
+  },
+  "ansi": [
+    "#313244",
+    "#f38ba8",
+    "#a6e3a1",
+    "#f9e2af",
+    "#89b4fa",
+    "#cba6f7",
+    "#89dceb",
+    "#cdd6f4",
+    "#7f849c",
+    "#f38ba8",
+    "#a6e3a1",
+    "#f9e2af",
+    "#89b4fa",
+    "#cba6f7",
+    "#89dceb",
+    "#cdd6f4"
+  ]
+}

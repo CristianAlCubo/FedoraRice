@@ -1,0 +1,112 @@
+# Generado por rice-theme desde theme.json (opulo). No editar a mano.
+"$schema" = 'https://starship.rs/config-schema.json'
+palette = "rice"
+add_newline = true
+command_timeout = 800
+
+# Marco estilo terminal "hacker": ╭─ segmentos ───────── hora ─╮ / ╰─❯
+format = """
+[╭─](fg:line)$os$username$hostname$directory$git_branch$git_status$nodejs$python$golang$rust$docker_context$cmd_duration$fill$status$time[─╮](fg:line)
+[╰─](fg:line)$sudo$character"""
+
+[palettes.rice]
+base = "#0b0e14"
+text = "#c5cdd9"
+dim = "#5c6773"
+line = "#21252c"
+accent = "#73d0ff"
+accent2 = "#d4bfff"
+cyan = "#95e6cb"
+green = "#aad94c"
+yellow = "#ffb454"
+orange = "#ff8f40"
+red = "#f07178"
+ink = "#070a0f"
+
+[fill]
+symbol = "─"
+style = "fg:line"
+
+[os]
+disabled = false
+format = "[](fg:accent)[$symbol ](bg:accent fg:ink)[](fg:accent) "
+[os.symbols]
+Fedora = ""
+Linux = ""
+
+[username]
+show_always = true
+format = "[](fg:accent2)[ $user](bg:accent2 fg:ink bold)"
+
+[hostname]
+ssh_only = false
+format = "[@$hostname ](bg:accent2 fg:ink bold)[](fg:accent2) "
+
+[directory]
+format = "[](fg:cyan)[ $path]($style)[$read_only]($read_only_style)[](fg:cyan)"
+style = "bg:cyan fg:ink bold"
+read_only = " "
+read_only_style = "bg:cyan fg:red bold"
+truncation_length = 3
+truncation_symbol = "…/"
+[directory.substitutions]
+"Documents" = " Documents"
+"Downloads" = " Downloads"
+"Pictures" = " Pictures"
+"code" = " code"
+".config" = " .config"
+
+[git_branch]
+symbol = ""
+format = " [](fg:green)[$symbol $branch](bg:green fg:ink bold)[](fg:green)"
+
+[git_status]
+format = "[( $all_status$ahead_behind)]($style)"
+style = "fg:yellow bold"
+conflicted = ""
+ahead = "⇡"
+behind = "⇣"
+diverged = "⇕"
+untracked = "?"
+stashed = ""
+modified = "!"
+staged = "+"
+renamed = "»"
+deleted = "✘"
+
+[nodejs]
+symbol = ""
+format = " [$symbol $version](fg:green)"
+[python]
+symbol = ""
+format = " [$symbol $version( \\\\($virtualenv\\\\))](fg:yellow)"
+[golang]
+symbol = ""
+format = " [$symbol $version](fg:cyan)"
+[rust]
+symbol = ""
+format = " [$symbol $version](fg:orange)"
+[docker_context]
+symbol = ""
+format = " [$symbol $context](fg:cyan)"
+
+[cmd_duration]
+min_time = 2000
+format = " [ $duration](fg:yellow)"
+
+[status]
+disabled = false
+format = "[  $status ](fg:red bold)"
+
+[time]
+disabled = false
+time_format = "%H:%M:%S"
+format = "[ $time](fg:accent2)"
+
+[sudo]
+disabled = false
+format = "[ ](fg:yellow bold)"
+
+[character]
+success_symbol = "[❯](fg:green bold)[❯](fg:accent bold)[❯](fg:accent2 bold)"
+error_symbol = "[❯❯❯](fg:red bold)"

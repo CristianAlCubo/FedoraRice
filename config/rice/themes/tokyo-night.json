@@ -1,0 +1,41 @@
+{
+  "id": "tokyo-night",
+  "name": "Tokyo Night",
+  "description": "Clean, dark theme that celebrates the lights of Tokyo at night.",
+  "colors": {
+    "base": "#1a1b26",
+    "bgDark": "#16161e",
+    "surface": "#24283b",
+    "text": "#c0caf5",
+    "dim": "#737aa2",
+    "accent": "#7aa2f7",
+    "accent2": "#bb9af7",
+    "cyan": "#7dcfff",
+    "green": "#9ece6a",
+    "yellow": "#e0af68",
+    "orange": "#ff9e64",
+    "red": "#f7768e",
+    "ink": "#16161e",
+    "line": "#292e42",
+    "selection": "#33467c",
+    "url": "#7dcfff"
+  },
+  "ansi": [
+    "#24283b",
+    "#f7768e",
+    "#9ece6a",
+    "#e0af68",
+    "#7aa2f7",
+    "#bb9af7",
+    "#7dcfff",
+    "#c0caf5",
+    "#737aa2",
+    "#f7768e",
+    "#9ece6a",
+    "#e0af68",
+    "#7aa2f7",
+    "#bb9af7",
+    "#7dcfff",
+    "#c0caf5"
+  ]
+}

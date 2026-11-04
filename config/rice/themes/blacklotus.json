@@ -1,0 +1,41 @@
+{
+  "id": "blacklotus",
+  "name": "BlackLotus",
+  "description": "Dark, dim, blue, purple... beautiful.",
+  "colors": {
+    "base": "#0f0f1a",
+    "bgDark": "#0a0a12",
+    "surface": "#1a1a2e",
+    "text": "#c8c8e8",
+    "dim": "#6a6a8e",
+    "accent": "#7b8cff",
+    "accent2": "#b48bff",
+    "cyan": "#6cd0ff",
+    "green": "#7ee0a8",
+    "yellow": "#e6c27a",
+    "orange": "#f0a070",
+    "red": "#ff6b8a",
+    "ink": "#0a0a12",
+    "line": "#252533",
+    "selection": "#2f345f",
+    "url": "#6cd0ff"
+  },
+  "ansi": [
+    "#1a1a2e",
+    "#ff6b8a",
+    "#7ee0a8",
+    "#e6c27a",
+    "#7b8cff",
+    "#b48bff",
+    "#6cd0ff",
+    "#c8c8e8",
+    "#6a6a8e",
+    "#ff6b8a",
+    "#7ee0a8",
+    "#e6c27a",
+    "#7b8cff",
+    "#b48bff",
+    "#6cd0ff",
+    "#c8c8e8"
+  ]
+}

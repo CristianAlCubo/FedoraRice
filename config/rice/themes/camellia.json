@@ -1,0 +1,41 @@
+{
+  "id": "camellia",
+  "name": "Camellia",
+  "description": "Dark yet vibrant color scheme.",
+  "colors": {
+    "base": "#1c1b22",
+    "bgDark": "#151419",
+    "surface": "#26242d",
+    "text": "#e6dfe8",
+    "dim": "#8a8194",
+    "accent": "#ff6b9d",
+    "accent2": "#c792ea",
+    "cyan": "#7fdbca",
+    "green": "#a9dc76",
+    "yellow": "#ffd866",
+    "orange": "#fc9867",
+    "red": "#ff6188",
+    "ink": "#151419",
+    "line": "#34333a",
+    "selection": "#603347",
+    "url": "#7fdbca"
+  },
+  "ansi": [
+    "#26242d",
+    "#ff6188",
+    "#a9dc76",
+    "#ffd866",
+    "#ff6b9d",
+    "#c792ea",
+    "#7fdbca",
+    "#e6dfe8",
+    "#8a8194",
+    "#ff6188",
+    "#a9dc76",
+    "#ffd866",
+    "#ff6b9d",
+    "#c792ea",
+    "#7fdbca",
+    "#e6dfe8"
+  ]
+}

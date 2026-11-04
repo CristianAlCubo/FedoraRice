@@ -1,0 +1,5 @@
+{
+  "weather":  { "name": "Bogotá", "lat": 4.711, "lon": -74.072, "refreshMin": 30 },
+  "launcher": { "favourites": ["firefox", "kitty", "org.gnome.Nautilus", "code"], "useCounts": true },
+  "toasts":   { "capsNum": true, "audioOutput": true, "layout": true, "vpn": true, "dnd": true, "gameMode": true }
+}

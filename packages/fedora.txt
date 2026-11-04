@@ -1,0 +1,24 @@
+# Paquetes de Fedora usados por el rice (dnf). Hyprland 0.56+ con configuración Lua.
+hyprland
+hyprlock
+hyprpaper
+quickshell
+kitty
+fastfetch
+fzf
+zoxide
+eza
+bat
+fd-find
+ripgrep
+git-delta
+tealdeer
+duf
+zsh
+grim
+slurp
+wl-clipboard
+playerctl
+brightnessctl
+python3-pillow
+jq

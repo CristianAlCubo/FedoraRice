@@ -1,0 +1,41 @@
+{
+  "id": "everblush",
+  "name": "Everblush",
+  "description": "Dark, vibrant and beautiful Colorscheme.",
+  "colors": {
+    "base": "#141b1e",
+    "bgDark": "#0f1518",
+    "surface": "#232a2d",
+    "text": "#dadada",
+    "dim": "#5c6a70",
+    "accent": "#67b0e8",
+    "accent2": "#c47fd5",
+    "cyan": "#6cbfbf",
+    "green": "#8ccf7e",
+    "yellow": "#e5c76b",
+    "orange": "#e59a6b",
+    "red": "#e57474",
+    "ink": "#0f1518",
+    "line": "#2d3437",
+    "selection": "#2d3437",
+    "url": "#6cbfbf"
+  },
+  "ansi": [
+    "#232a2d",
+    "#e57474",
+    "#8ccf7e",
+    "#e5c76b",
+    "#67b0e8",
+    "#c47fd5",
+    "#6cbfbf",
+    "#dadada",
+    "#5c6a70",
+    "#e57474",
+    "#8ccf7e",
+    "#e5c76b",
+    "#67b0e8",
+    "#c47fd5",
+    "#6cbfbf",
+    "#dadada"
+  ]
+}

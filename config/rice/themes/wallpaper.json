@@ -1,0 +1,41 @@
+{
+  "id": "wallpaper",
+  "name": "Fondo (auto)",
+  "description": "Paleta generada desde el fondo de escritorio actual.",
+  "colors": {
+    "base": "#201813",
+    "bgDark": "#16100c",
+    "surface": "#2f251d",
+    "text": "#ede1d9",
+    "dim": "#ae9c8f",
+    "accent": "#f1ae7e",
+    "accent2": "#8ea5eb",
+    "cyan": "#86d9ea",
+    "green": "#9eda81",
+    "yellow": "#efce80",
+    "orange": "#f4a571",
+    "red": "#f17e92",
+    "ink": "#16100c",
+    "line": "#39302b",
+    "selection": "#5f4533",
+    "url": "#86d9ea"
+  },
+  "ansi": [
+    "#2f251d",
+    "#f17e92",
+    "#9eda81",
+    "#efce80",
+    "#f1ae7e",
+    "#8ea5eb",
+    "#86d9ea",
+    "#ede1d9",
+    "#ae9c8f",
+    "#f17e92",
+    "#9eda81",
+    "#efce80",
+    "#f1ae7e",
+    "#8ea5eb",
+    "#86d9ea",
+    "#ede1d9"
+  ]
+}

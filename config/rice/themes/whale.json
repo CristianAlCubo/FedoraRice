@@ -1,0 +1,41 @@
+{
+  "id": "whale",
+  "name": "Whale",
+  "description": "Dark theme inspired by Ark and Nord.",
+  "colors": {
+    "base": "#232b36",
+    "bgDark": "#1a2029",
+    "surface": "#2d3745",
+    "text": "#d8dee9",
+    "dim": "#6f7f96",
+    "accent": "#62b6e3",
+    "accent2": "#a98fd6",
+    "cyan": "#7fd1d1",
+    "green": "#8fcf9a",
+    "yellow": "#e3c77c",
+    "orange": "#e09a6c",
+    "red": "#e0707e",
+    "ink": "#1a2029",
+    "line": "#39404b",
+    "selection": "#36556a",
+    "url": "#7fd1d1"
+  },
+  "ansi": [
+    "#2d3745",
+    "#e0707e",
+    "#8fcf9a",
+    "#e3c77c",
+    "#62b6e3",
+    "#a98fd6",
+    "#7fd1d1",
+    "#d8dee9",
+    "#6f7f96",
+    "#e0707e",
+    "#8fcf9a",
+    "#e3c77c",
+    "#62b6e3",
+    "#a98fd6",
+    "#7fd1d1",
+    "#d8dee9"
+  ]
+}

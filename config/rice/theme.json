@@ -1,0 +1,64 @@
+{
+  "name": "opulo",
+  "colors": {
+    "base": "#0b0e14",
+    "bgDark": "#070a0f",
+    "surface": "#151a23",
+    "text": "#c5cdd9",
+    "dim": "#5c6773",
+    "accent": "#73d0ff",
+    "accent2": "#d4bfff",
+    "cyan": "#95e6cb",
+    "green": "#aad94c",
+    "yellow": "#ffb454",
+    "orange": "#ff8f40",
+    "red": "#f07178",
+    "ink": "#070a0f",
+    "line": "#21252c",
+    "selection": "#2a485a",
+    "url": "#95e6cb"
+  },
+  "ansi": [
+    "#151a23",
+    "#f07178",
+    "#aad94c",
+    "#ffb454",
+    "#73d0ff",
+    "#d4bfff",
+    "#95e6cb",
+    "#c5cdd9",
+    "#5c6773",
+    "#f07178",
+    "#aad94c",
+    "#ffb454",
+    "#73d0ff",
+    "#d4bfff",
+    "#95e6cb",
+    "#c5cdd9"
+  ],
+  "opacity": {
+    "panel": 1.0,
+    "bar": 0.9,
+    "terminal": 0.92
+  },
+  "fonts": {
+    "sans": "Rubik",
+    "mono": "FiraCode Nerd Font Mono",
+    "monoSize": 12,
+    "lockMono": "Adwaita Mono"
+  },
+  "layout": {
+    "sidebarW": 64,
+    "frameW": 10,
+    "frameR": 24
+  },
+  "id": "opulo",
+  "surfaces": [
+    0.09,
+    0.15,
+    0.22
+  ],
+  "scale": {
+    "anim": 1.3
+  }
+}

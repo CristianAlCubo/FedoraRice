@@ -1,0 +1,14 @@
+[SddmGreeterTheme]
+Name=Cubi
+Description=Login minimalista oscuro con acento cian, a juego con el shell de Quickshell
+Author=cristian
+Type=sddm-theme
+Version=1.0
+Website=
+Screenshot=
+MainScript=Main.qml
+ConfigFile=theme.conf
+TranslationsDirectory=translations
+Theme-Id=cubi
+Theme-API=2.0
+QTVersion=6
