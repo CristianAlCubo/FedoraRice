@@ -53,6 +53,10 @@ ShellRoot {
     PwObjectTracker { objects: [Pipewire.defaultAudioSink] }
     readonly property var sink: Pipewire.defaultAudioSink?.audio ?? null
 
+    // ── Micrófono: estado para el botón de la barra (solo encendido/apagado) ──
+    PwObjectTracker { objects: [Pipewire.defaultAudioSource] }
+    readonly property var mic: Pipewire.defaultAudioSource?.audio ?? null
+
     SystemClock { id: clock; precision: SystemClock.Seconds }
 
     Launcher { id: launcher }
@@ -409,6 +413,46 @@ ShellRoot {
                                 tint: root.mem > 0.9 ? Theme.danger : root.text }
                         }
                         HoverHandler { onHoveredChanged: hovered ? bar.hov("stats", statsBox) : pop.cancelHover() }
+                    }
+
+                    // Micrófono: un solo botón, click silencia/activa. Ganancia y entrada: centro de control.
+                    // OFF rojo = silenciado · ON verde = activo · N/A gris = sin dispositivo
+                    Item {
+                        id: micBox
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        implicitWidth: Theme.sidebarW - 16
+                        implicitHeight: 44
+                        readonly property bool has: root.mic !== null
+                        readonly property bool muted: root.mic?.muted ?? false
+                        readonly property color tone: !has ? Theme.dim : muted ? Theme.danger : Theme.green
+
+                        Rectangle {
+                            id: micPill
+                            anchors.centerIn: parent
+                            width: 40; height: 40; radius: 14
+                            color: micMouse.containsMouse ? Qt.alpha(micBox.tone, 0.22) : Qt.alpha(micBox.tone, micBox.has ? 0.12 : 0)
+                            border.width: micBox.muted ? 1 : 0
+                            border.color: Qt.alpha(micBox.tone, 0.55)
+                            Behavior on color { ColorAnimation { duration: Theme.dur(190); easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.cEffects } }
+
+                            Icon {
+                                anchors { horizontalCenter: parent.horizontalCenter; top: parent.top; topMargin: 6 }
+                                name: micBox.muted || !micBox.has ? "microphone-sensitivity-muted" : "microphone-sensitivity-high"
+                                color: micBox.tone; size: 18
+                            }
+                            Text {
+                                anchors { horizontalCenter: parent.horizontalCenter; bottom: parent.bottom; bottomMargin: 4 }
+                                text: !micBox.has ? "N/A" : micBox.muted ? "OFF" : "ON"
+                                color: micBox.tone
+                                font.family: root.font; font.pixelSize: 8; font.letterSpacing: 0.6; font.weight: Font.Medium
+                            }
+                        }
+                        MouseArea {
+                            id: micMouse
+                            anchors.fill: parent; hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: if (root.mic) root.mic.muted = !root.mic.muted
+                        }
                     }
 
                     // Volumen: scroll para ajustar, click para silenciar

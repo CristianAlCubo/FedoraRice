@@ -113,7 +113,7 @@ Scope {
             Rectangle {
                 id: card
                 width: 740
-                height: 16 + 46 + 12 + 372 + 16
+                height: 16 + 46 + 12 + 428 + 16
                 x: (parent.width - width) / 2 + (Theme.sidebarW - Theme.frameW) / 2
                 y: Theme.frameW
                 color: "transparent"

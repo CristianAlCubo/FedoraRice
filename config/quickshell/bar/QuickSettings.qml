@@ -12,7 +12,7 @@ Item {
     required property var notifs
     property bool active: false          // panel visible → consulta la red
     property bool focused: false         // el teclado está dentro de este panel
-    // 0 volumen · 1 selector de salida · 2..5 interruptores (2x2) · 6 lista de salidas
+    // 0 volumen · 1 selector de salida · 2..5 interruptores (2x2) · 6 lista de dispositivos · 7 micrófono · 8 selector de entrada
     property int sel: 0
     property int devIdx: 0
     onFocusedChanged: if (focused) { sel = 0; devIdx = 0 }
@@ -35,19 +35,38 @@ Item {
             return false
         }
         if (sel === 1) {
-            if (enter) { devicesOpen = !devicesOpen; return true }
+            if (enter) { toggleDev("out"); return true }
             if (k === Qt.Key_Up) { sel = 0; return true }
+            if (k === Qt.Key_Down) { sel = 7; return true }
+            return true
+        }
+        if (sel === 7) {
+            if (k === Qt.Key_Left || k === Qt.Key_Right) {
+                if (source?.audio) source.audio.volume = Math.max(0, Math.min(1, micVol + (k === Qt.Key_Right ? 0.05 : -0.05)))
+                return true
+            }
+            if (enter) { if (source?.audio) source.audio.muted = !source.audio.muted; return true }
+            if (k === Qt.Key_Up) { sel = 1; return true }
+            if (k === Qt.Key_Down) { sel = 8; return true }
+            return true
+        }
+        if (sel === 8) {
+            if (enter) { toggleDev("in"); return true }
+            if (k === Qt.Key_Up) { sel = 7; return true }
             if (k === Qt.Key_Down) {
-                if (devicesOpen && sinks.length > 0) { sel = 6; devIdx = Math.max(0, sinks.findIndex(n => sink && n.id === sink.id)) }
+                if (devicesOpen && devList.length > 0) { sel = 6; const cur = devMode === "in" ? source : sink; devIdx = Math.max(0, devList.findIndex(n => cur && n.id === cur.id)) }
                 else if (!devicesOpen) sel = 2
                 return true
             }
             return true
         }
         if (sel === 6) {
-            if (k === Qt.Key_Down) { devIdx = Math.min(sinks.length - 1, devIdx + 1); return true }
-            if (k === Qt.Key_Up) { if (devIdx > 0) devIdx--; else sel = 1; return true }
-            if (enter) { Pipewire.preferredDefaultAudioSink = sinks[devIdx]; devicesOpen = false; sel = 1; return true }
+            if (k === Qt.Key_Down) { devIdx = Math.min(devList.length - 1, devIdx + 1); return true }
+            if (k === Qt.Key_Up) { if (devIdx > 0) devIdx--; else sel = devMode === "in" ? 8 : 1; return true }
+            if (enter) {
+                if (devMode === "in") Pipewire.preferredDefaultAudioSource = devList[devIdx]; else Pipewire.preferredDefaultAudioSink = devList[devIdx]
+                const back = devMode === "in" ? 8 : 1; devicesOpen = false; sel = back; return true
+            }
             return true
         }
         // interruptores
@@ -55,11 +74,11 @@ Item {
         if (k === Qt.Key_Left && g % 2 === 1) { sel--; return true }
         if (k === Qt.Key_Right && g % 2 === 0) { sel++; return true }
         if (k === Qt.Key_Down && g < 2) { sel += 2; return true }
-        if (k === Qt.Key_Up) { if (g >= 2) sel -= 2; else sel = 1; return true }
+        if (k === Qt.Key_Up) { if (g >= 2) sel -= 2; else sel = 8; return true }
         if (enter) { toggleTile(sel); return true }
         return k === Qt.Key_Left || k === Qt.Key_Right || k === Qt.Key_Down
     }
-    onDevicesOpenChanged: if (!devicesOpen && sel === 6) sel = 1
+    onDevicesOpenChanged: if (!devicesOpen && sel === 6) sel = devMode === "in" ? 8 : 1
 
     implicitHeight: col.implicitHeight
 
@@ -73,7 +92,16 @@ Item {
     readonly property string volIcon: volMuted || vol <= 0 ? "audio-volume-muted"
         : vol < 0.34 ? "audio-volume-low" : vol < 0.67 ? "audio-volume-medium" : "audio-volume-high"
     property bool devicesOpen: false
+    property string devMode: "out"        // lista abierta: "out" salidas · "in" entradas (micrófono)
     onActiveChanged: if (!active) devicesOpen = false
+
+    // ── Micrófono ───────────────────────────────────────────
+    readonly property var sources: Pipewire.nodes.values.filter(n => !n.isSink && !n.isStream && n.audio && !/\.monitor$/.test(n.name))
+    readonly property var devList: devMode === "in" ? sources : sinks
+    readonly property real micVol: source?.audio?.volume ?? 0
+    readonly property bool micMuted: source?.audio?.muted ?? false
+    readonly property string micIcon: micMuted || !source ? "microphone-sensitivity-muted" : "microphone-sensitivity-high"
+    function toggleDev(mode) { if (devicesOpen && devMode === mode) devicesOpen = false; else { devMode = mode; devicesOpen = true } }
 
     // ── Bluetooth ───────────────────────────────────────────
     readonly property var bt: Bluetooth.defaultAdapter
@@ -129,19 +157,55 @@ Item {
 
             Rectangle {
                 implicitWidth: 46; implicitHeight: 46; radius: 23
-                color: qs.devicesOpen ? Theme.accent : (arrowM.containsMouse ? Theme.bgHover : Theme.bgSoft)
+                readonly property bool open: qs.devicesOpen && qs.devMode === "out"
+                color: open ? Theme.accent : (arrowM.containsMouse ? Theme.bgHover : Theme.bgSoft)
                 Behavior on color { ColorAnimation { duration: Theme.dur(190); easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.cEffects } }
                 Icon {
                     anchors.centerIn: parent
                     name: "pan-down"; size: 16
-                    color: qs.devicesOpen ? Theme.ink : Theme.text
-                    rotation: qs.devicesOpen ? 180 : 0
+                    color: parent.open ? Theme.ink : Theme.text
+                    rotation: parent.open ? 180 : 0
                     Behavior on rotation { NumberAnimation { duration: Theme.dur(180); easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.cStandard } }
                 }
                 MouseArea { id: arrowM; anchors.fill: parent; hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: qs.devicesOpen = !qs.devicesOpen }
+                    onClicked: qs.toggleDev("out") }
                 FocusRing { shown: qs.focused && qs.sel === 1 }
+            }
+        }
+
+        // ── Micrófono: ganancia (el icono silencia) + selector de entrada ──
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 8
+
+            PillSlider {
+                Layout.fillWidth: true
+                showValue: false
+                icon: qs.micIcon
+                value: qs.micVol
+                dimmed: qs.micMuted || !qs.source
+                onMoved: v => { if (qs.source?.audio) qs.source.audio.volume = v }
+                onIconClicked: if (qs.source?.audio) qs.source.audio.muted = !qs.source.audio.muted
+                FocusRing { shown: qs.focused && qs.sel === 7 }
+            }
+
+            Rectangle {
+                implicitWidth: 46; implicitHeight: 46; radius: 23
+                readonly property bool open: qs.devicesOpen && qs.devMode === "in"
+                color: open ? Theme.accent : (micArrowM.containsMouse ? Theme.bgHover : Theme.bgSoft)
+                Behavior on color { ColorAnimation { duration: Theme.dur(190); easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.cEffects } }
+                Icon {
+                    anchors.centerIn: parent
+                    name: "pan-down"; size: 16
+                    color: parent.open ? Theme.ink : Theme.text
+                    rotation: parent.open ? 180 : 0
+                    Behavior on rotation { NumberAnimation { duration: Theme.dur(180); easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.cStandard } }
+                }
+                MouseArea { id: micArrowM; anchors.fill: parent; hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: qs.toggleDev("in") }
+                FocusRing { shown: qs.focused && qs.sel === 8 }
             }
         }
 
@@ -179,7 +243,7 @@ Item {
                     Layout.fillWidth: true; Layout.preferredWidth: 1
                     icon: qs.source?.audio?.muted ? "microphone-sensitivity-muted" : "microphone-sensitivity-high"
                     title: "Micrófono"
-                    sub: qs.source?.audio?.muted ? "Silenciado" : "Activo"
+                    sub: !qs.source ? "Sin dispositivo" : qs.micMuted ? "Silenciado" : "Activo"
                     on: qs.source?.audio ? !qs.source.audio.muted : false
                     onClicked: if (qs.source?.audio) qs.source.audio.muted = !qs.source.audio.muted
                     FocusRing { shown: qs.focused && qs.sel === 4 }
@@ -208,12 +272,12 @@ Item {
                     clip: true
                     spacing: 2
                     boundsBehavior: Flickable.StopAtBounds
-                    model: qs.sinks
+                    model: qs.devList
                     delegate: Rectangle {
                         required property var modelData
                         required property int index
                         readonly property bool kbd: qs.focused && qs.sel === 6 && qs.devIdx === index
-                        readonly property bool current: qs.sink && qs.sink.id === modelData.id
+                        readonly property bool current: { const d = qs.devMode === "in" ? qs.source : qs.sink; return d && d.id === modelData.id }
                         width: ListView.view.width
                         height: 40
                         radius: 20
@@ -240,7 +304,10 @@ Item {
                             anchors.fill: parent
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: { Pipewire.preferredDefaultAudioSink = modelData; qs.devicesOpen = false }
+                            onClicked: {
+                                if (qs.devMode === "in") Pipewire.preferredDefaultAudioSource = modelData; else Pipewire.preferredDefaultAudioSink = modelData
+                                qs.devicesOpen = false
+                            }
                         }
                     }
                 }
