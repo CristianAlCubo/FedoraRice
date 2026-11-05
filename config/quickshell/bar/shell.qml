@@ -496,7 +496,7 @@ ShellRoot {
                         }
                     }
 
-                    // Panel de controles (derecha)
+                    // Panel de controles (se abre junto a la sidebar, abajo)
                     Rectangle {
                         anchors.horizontalCenter: parent.horizontalCenter
                         width: 40; height: 40; radius: 20

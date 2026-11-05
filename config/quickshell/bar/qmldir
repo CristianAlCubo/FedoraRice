@@ -36,3 +36,5 @@ Toasts 1.0 Toasts.qml
 SessionMenu 1.0 SessionMenu.qml
 Anim 1.0 Anim.qml
 Ripple 1.0 Ripple.qml
+SideClip 1.0 SideClip.qml
+GrowPanel 1.0 GrowPanel.qml

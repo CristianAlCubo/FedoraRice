@@ -233,20 +233,21 @@ Scope {
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
             WlrLayershell.namespace: "sidebar-popout"
 
-            Item {
+            SideClip { id: sideClip }
+
+            GrowPanel {
                 id: card
-                x: Theme.sidebarW
-                width: 300
-                height: (body.item ? body.item.implicitHeight : 0) + 28
+                parent: sideClip
+                x: 0
+                panelWidth: 300
+                panelHeight: (body.item ? body.item.implicitHeight : 0) + 28
+                radius: 22
                 readonly property real top0: Theme.frameW + Theme.frameR + Theme.flare
                 y: Math.max(top0, Math.min(win.height - height - top0, pop.anchorY - height / 2))
-                visible: opacity > 0.01
-                opacity: win.mine ? 1 : 0
-                transform: Translate { x: win.mine ? 0 : -24; Behavior on x { Anim { kind: "fastSpatial" } } }
-                Behavior on opacity { NumberAnimation { duration: Theme.dur(90) } }
+                reveal: win.mine ? 1 : 0
+                Behavior on reveal { Anim { kind: "fastSpatial" } }
                 Behavior on y { enabled: win.mine; NumberAnimation { duration: Theme.dur(120); easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.cStandard } }
 
-                Fused { edge: "left"; r: 22 }
                 HoverHandler { onHoveredChanged: hovered ? pop.enter() : pop.leave() }
                 MouseArea { anchors.fill: parent }
 

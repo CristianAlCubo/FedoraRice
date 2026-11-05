@@ -5,7 +5,7 @@ import Quickshell.Io
 import Quickshell.Hyprland
 import Quickshell.Wayland
 
-// Panel de controles a la derecha (estilo caelestia): ajustes rápidos, captura,
+// Panel de controles junto a la sidebar, abajo (estilo caelestia): ajustes rápidos, captura,
 // accesos a Ajustes y sesión (bloquear, salir, reiniciar, apagar).
 // Se abre desde el engranaje de la sidebar o con `qs ipc call controls toggle`.
 Scope {
@@ -52,18 +52,20 @@ Scope {
             MouseArea { anchors.fill: parent; onClicked: cp.open = false }
             FocusScope { id: keys; anchors.fill: parent; Keys.onEscapePressed: cp.open = false }
 
-            Rectangle {
+            SideClip { id: sideClip }
+
+            GrowPanel {
                 id: card
-                width: 380
-                height: Math.min(win.height - 2 * (Theme.frameW + Theme.frameR + Theme.flare), col.implicitHeight + 36)
-                y: (win.height - height) / 2
-                x: win.width - width - Theme.frameW
+                parent: sideClip
+                panelWidth: 380
+                panelHeight: Math.min(win.height - 2 * (Theme.frameW + Theme.frameR + Theme.flare), col.implicitHeight + 36)
+                radius: 28
+                // pegado a la sidebar y anclado abajo, a la altura del botón que lo abre
+                x: 0
+                y: win.height - height - (Theme.frameW + Theme.frameR + Theme.flare)
                 property real off: win.visible ? 0 : 1
                 Behavior on off { Anim { kind: "spatial" } }
-                opacity: Math.max(0, Math.min(1, 1 - off * 1.2))
-                transform: Translate { x: card.off * (card.width + Theme.frameW + 10) }
-                color: "transparent"
-                Fused { edge: "right"; r: 28 }
+                reveal: 1 - off
                 MouseArea { anchors.fill: parent }
 
                 ColumnLayout {
