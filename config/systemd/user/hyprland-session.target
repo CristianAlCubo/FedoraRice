@@ -1,0 +1,8 @@
+# Lo arranca hyprland.lua al iniciar sesión. Activa graphical-session.target, del que dependen
+# xdg-desktop-portal (tema oscuro de GTK/libadwaita, diálogos de archivos, compartir pantalla).
+[Unit]
+Description=Sesión de Hyprland
+Documentation=man:systemd.special(7)
+BindsTo=graphical-session.target
+Wants=graphical-session-pre.target
+After=graphical-session-pre.target

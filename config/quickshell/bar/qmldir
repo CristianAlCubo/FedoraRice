@@ -21,7 +21,6 @@ FocusRing 1.0 FocusRing.qml
 RoundClip 1.0 RoundClip.qml
 Settings 1.0 Settings.qml
 Widgets 1.0 Widgets.qml
-Assistant 1.0 Assistant.qml
 Recorder 1.0 Recorder.qml
 RightPanel 1.0 RightPanel.qml
 Frame 1.0 Frame.qml

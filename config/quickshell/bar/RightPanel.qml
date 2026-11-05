@@ -6,7 +6,7 @@ import Quickshell.Hyprland
 import Quickshell.Wayland
 
 // Panel de controles a la derecha (estilo caelestia): ajustes rápidos, captura,
-// accesos a Ajustes/Asistente y sesión (bloquear, salir, reiniciar, apagar).
+// accesos a Ajustes y sesión (bloquear, salir, reiniciar, apagar).
 // Se abre desde el engranaje de la sidebar o con `qs ipc call controls toggle`.
 Scope {
     id: cp
@@ -14,7 +14,6 @@ Scope {
     required property var notifs
     required property var rec
     required property var dash
-    required property var assistant
     property bool open: false
 
     readonly property string home: Quickshell.env("HOME")
@@ -129,7 +128,6 @@ Scope {
                         Repeater {
                             model: [
                                 { t: "Fondos",    g: "", k: "settings" },
-                                { t: "Asistente", g: "", k: "assistant" },
                                 { t: "Widgets",   g: "", k: "widgets" },
                                 { t: "Juego",     g: "", k: "game" }
                             ]
@@ -157,7 +155,6 @@ Scope {
                                         if (ab.modelData.k === "settings") cp.run(q + "settings toggle")
                                         else if (ab.modelData.k === "widgets") cp.run(q + "widgets edit")
                                         else if (ab.modelData.k === "game") cp.run(q + "gamemode toggle")
-                                        else cp.assistant.open = true
                                     } }
                                 Ripple {}
                             }
