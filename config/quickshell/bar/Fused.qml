@@ -7,7 +7,7 @@ import QtQuick.Shapes
 Shape {
     id: s
     property string edge: "top"        // top | bottom | left | right
-    property color fill: Theme.bg
+    property color fill: Theme.frame     // mismo token que el marco y la sidebar: la unión no se nota
     property real r: 24                // radio de las esquinas lejanas
     property real f: Theme.flare       // radio de las uniones con el borde
     property real ext: 90              // el relleno se extiende hacia fuera del borde: tapa el hueco cuando el rebote separa el panel

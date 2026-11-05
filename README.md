@@ -10,7 +10,7 @@ Inspirado en [caelestia-dots/shell](https://github.com/caelestia-dots/shell) (cu
 
 | Pieza | Descripción |
 |---|---|
-| **Quickshell** (`config/quickshell/bar`) | Barra lateral, dashboard, lanzador de apps, panel de controles, notificaciones agrupadas, toasts, menú de sesión, modo juego, widgets de escritorio, ajustes y asistente con IA. |
+| **Quickshell** (`config/quickshell/bar`) | Barra lateral, dashboard, lanzador de apps, panel de controles, notificaciones agrupadas, toasts, menú de sesión, modo juego, widgets de escritorio y ajustes. Un marco "inset" de esquinas redondeadas rodea el escritorio. |
 | **Hyprland** (`config/hypr`) | `hyprland.lua` con animaciones suaves a 144 Hz (sin rebote), espacios de trabajo por grupos entre monitores, blur y sombras, y `hyprlock`. |
 | **Sistema de temas** (`config/rice`) | `theme.json` + `apply.py` (`rice-theme`): **15 temas** más uno que sale del fondo de pantalla. Un comando regenera kitty, Hyprland, hyprlock, Starship, fastfetch y fzf. |
 | **Terminal** (`config/kitty`, `config/zsh`, `home/zshrc`) | kitty + zsh + oh-my-zsh, prompt [Starship](https://starship.rs), bienvenida con fastfetch, fzf, zoxide, eza, bat y delta. Arranque de zsh ≈ 0,09 s. |
@@ -44,7 +44,6 @@ cada integración solo se activa si el programa está instalado (`config/zsh/qol
 | `Super` (solo) o `Super+D` | Dashboard |
 | `Super+R` | Lanzador de apps (también comandos, temas y acciones) |
 | `Super+I` | Ajustes (fondos, widgets…) |
-| `Super+A` | Asistente |
 | `Super+W` | Editar widgets de escritorio |
 | `Super+Shift+G` | Modo juego |
 | `Super+Esc` | Menú de sesión |
@@ -57,36 +56,42 @@ cada integración solo se activa si el programa está instalado (`config/zsh/qol
 
 ## Instalación
 
-Pensado para una **Fedora 44 recién instalada** (Hyprland 0.56+, la configuración usa la API Lua).
+Pensado para **Fedora 44** (Workstation u otra edición). Hyprland debe ser **≥ 0.55** (la configuración usa la API Lua).
 
 ```bash
 git clone https://github.com/CristianAlCubo/FedoraRice.git
 cd FedoraRice
-./install.sh --system
+./install.sh
 ```
 
-Un solo comando deja el sistema como en las capturas. **Sin `--system`** hace todo lo que no necesita sudo.
+Un solo comando instala las dependencias, aplica la configuración y deja SDDM listo: reinicia y entra en **Hyprland**.
+Pide la contraseña de sudo una vez. **Es idempotente**: puedes repetirlo cuando quieras, también sobre una instalación
+rota; cada paso comprueba el estado real y repara solo lo que falte.
 
-| Paso | Qué hace | Necesita |
-|---|---|---|
-| Paquetes | Habilita el COPR `byte0/hyprland` e instala Hyprland, Quickshell, kitty, fzf, eza, zoxide, delta… (`packages/fedora.txt`) | `--system` (sudo) |
-| Shell | Pone zsh como shell por defecto | `--system` |
-| Configuración | Quickshell, Hyprland, rice/temas, kitty, zsh, Starship, fastfetch, git/delta; reescribe las rutas a tu `$HOME` | – |
-| `~/.zshrc` | Lo reemplaza por el del rice (con `--keep-zshrc` lo deja y guarda el nuevo en `~/.zshrc.rice`) | – |
-| Fuentes | Rubik y FiraCode Nerd Font Mono | – |
-| Fondos | Los 3 en uso (escritorio, bloqueo y login) en `~/Imágenes/Wallpapers` | – |
-| Terminal | oh-my-zsh, `zsh-autosuggestions`, `zsh-syntax-highlighting` (git clone) y Starship (binario de GitHub) | internet |
-| Cursor e iconos | Cursor Bibata-Modern-Ice (GitHub); Papirus-Dark viene en los paquetes; ajustes GTK/gsettings | internet |
-| Tema | Regenera los colores derivados del tema activo (`rice-theme`) | – |
-| SDDM | Tema de inicio de sesión (omitir con `--no-sddm`) | `--system` |
+```bash
+./install.sh --check     # diagnóstico: ✔/✘ por componente, sin tocar nada
+```
 
-Todo lo que sustituye se respalda en `~/.config-backup-<fecha>/`. Es seguro repetirlo, y si un paso de descarga falla avisa y continúa.
+| Fase | Qué hace |
+|---|---|
+| 0. Previas | Comprueba Fedora, sudo y red. Registro en `~/.cache/rice-install.log`. |
+| 1. Repos | Solo si Hyprland ≥ 0.55 o Quickshell no están ya instalados: prueba COPR candidatos en orden (Hyprland: `ashbuk/Hyprland-Fedora`, `lionheartp/Hyprland`, `nett00n/hyprland`…; Quickshell: `errornointernet/quickshell`, `nett00n/hyprland`) y activa el primero que tenga paquetes para tu Fedora. Forzar uno: `HYPR_COPR=… QS_COPR=… ./install.sh`. |
+| 2. Paquetes | `packages/fedora.txt`: los de `[core]` son obligatorios (si uno falla, se detiene y dice cuál); los de `[extra]` se intentan y se avisa. Verifica Hyprland ≥ 0.55 y lo actualiza si hace falta. |
+| 3. Shell | zsh por defecto; oh-my-zsh + `zsh-autosuggestions` + `zsh-syntax-highlighting` (si una carpeta quedó a medias, se aparta y se reinstala); Starship. |
+| 4. Fuentes y cursor | Rubik, FiraCode Nerd Font Mono, cursor Bibata, Papirus, GTK oscuro. |
+| 5. Configuración | Copia `config/` a `~/.config` con rsync (solo lo que cambió; respaldo en `~/.config-backup/rice-<fecha>/`, se guardan los 5 últimos). **Nunca pisa tu estado**: `monitors.lua`, `wallpaper.state`, avatar, widgets, tema elegido, claves. |
+| 6. Generados | Colores del tema, fondos, avatar por defecto y fondos del bloqueo. |
+| 7. SDDM | Tema `cubi`, greeter Wayland (weston) solo en el monitor más grande, Hyprland como sesión por defecto, y SDDM como gestor de login (sustituye a GDM). Omitir con `--no-sddm`. |
+| 8. Comprobación | Igual que `--check`. Si lo ejecutas dentro de Hyprland, además recarga Hyprland y Quickshell. |
 
-**Lo que queda a mano**
-- **Monitores:** `config/hypr/hyprland.lua` define `DP-2` (2560×1440@144) y `DP-1`. Mira tus nombres con `hyprctl monitors` y ajústalos.
-- **Claves (opcionales):** `~/.config/nexora/env` (asistente con IA) y `~/.config/hypr/spotify-api.json` (búsqueda en Spotify). Se crean vacíos desde `templates/` y nunca se suben a git.
-- **Apps tuyas:** Spotify (snap), Steam, Docker, etc. El rice las usa si están instaladas.
-- Después, cierra sesión y entra en la sesión **Hyprland**.
+Otras opciones: `--user-only` (sin sudo: solo la parte de usuario), `--keep-zshrc` (deja tu `~/.zshrc`; el del rice queda en `~/.zshrc.rice`).
+
+**Monitores:** `~/.config/hypr/monitors.lua` describe los tuyos (se crea una vez desde `templates/monitors.lua` y nunca
+se pisa). Nombres con `hyprctl monitors`. Una regla comodín enciende cualquier pantalla no descrita, el fondo se aplica a
+todos los monitores conectados y el bloqueo detecta los monitores cada vez: si falta la imagen usa una captura difuminada,
+así que nunca queda en negro.
+
+**Opcional:** `~/.config/hypr/spotify-api.json` (búsqueda en Spotify desde el lanzador). Spotify, Steam, etc. se usan si están instalados.
 
 ## Mantener el repo al día
 
@@ -94,7 +99,7 @@ Todo lo que sustituye se respalda en `~/.config-backup-<fecha>/`. Es seguro repe
 ./sync.sh     # copia tu configuración viva al repo (sin secretos ni respaldos; rutas → @HOME@)
 git add -A && git commit -m "…" && git push
 ```
-`.gitignore` y `sync.sh` excluyen claves, estado local (`wallpaper.state`, `widgets.json`), el avatar y los `*.bak*`. Los fondos de `wallpapers/` se añaden a mano.
+`.gitignore` y `sync.sh` excluyen claves, estado local (`wallpaper.state`, `widgets.json`, `monitors.lua`), el avatar y los `*.bak*`. Los fondos de `wallpapers/` se añaden a mano.
 
 ## Paneles (capturas)
 

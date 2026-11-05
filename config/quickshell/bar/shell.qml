@@ -65,7 +65,6 @@ ShellRoot {
     Dashboard { id: nc; notifs: notifs; rec: rec }
     Settings { id: settingsPanel }
     Widgets {}
-    Assistant { id: assistant }
     TrayMenu { id: tray }
     Osd {}
     Frame {}
@@ -73,7 +72,7 @@ ShellRoot {
     GameMode { id: gamemode }
     Toasts { id: toasts; notifs: notifs; gamemode: gamemode }
     Popouts { id: pop }
-    RightPanel { id: controls; notifs: notifs; rec: rec; dash: nc; assistant: assistant }
+    RightPanel { id: controls; notifs: notifs; rec: rec; dash: nc }
 
     // ── Una barra por monitor ───────────────────────────────
     // ── Sidebar izquierda (una por monitor) ─────────────────
@@ -97,7 +96,7 @@ ShellRoot {
             Item {      // el fondo lo dibuja Frame.qml (la sidebar es parte del marco)
                 anchors.fill: parent
 
-                // ── Arriba: lanzador, workspaces, asistente ──
+                // ── Arriba: lanzador, workspaces ──
                 Column {
                     anchors { top: parent.top; topMargin: 10; horizontalCenter: parent.horizontalCenter }
                     spacing: 14
@@ -218,48 +217,6 @@ ShellRoot {
                         smooth: true
                         opacity: 0.9
                         HoverHandler { onHoveredChanged: hovered ? bar.hov("window", winIcon) : pop.cancelHover() }
-                    }
-
-                    // Asistente: clic abre/oculta el avatar, clic derecho abre los ajustes
-                    Item {
-                        width: 24; height: 24
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        Canvas {
-                            id: spark
-                            anchors.centerIn: parent
-                            width: 18; height: 18
-                            property color tint: asM.containsMouse ? root.accent : root.text
-                            onTintChanged: requestPaint()
-                            onPaint: {
-                                const c = getContext("2d"); c.reset()
-                                c.fillStyle = tint
-                                const star = (cx, cy, r) => {
-                                    c.beginPath(); c.moveTo(cx, cy - r)
-                                    c.quadraticCurveTo(cx, cy, cx + r, cy); c.quadraticCurveTo(cx, cy, cx, cy + r)
-                                    c.quadraticCurveTo(cx, cy, cx - r, cy); c.quadraticCurveTo(cx, cy, cx, cy - r)
-                                    c.fill()
-                                }
-                                star(7.5, 10.5, 7); star(14.5, 3.5, 3.2)
-                            }
-                        }
-                        Rectangle {   // la API del asistente está en marcha
-                            visible: assistant.apiUp
-                            anchors { right: parent.right; bottom: parent.bottom; rightMargin: 1; bottomMargin: 1 }
-                            width: 6; height: 6; radius: 3
-                            color: Theme.green
-                        }
-                        MouseArea {
-                            id: asM
-                            anchors.fill: parent
-                            anchors.margins: -5
-                            hoverEnabled: true
-                            acceptedButtons: Qt.LeftButton | Qt.RightButton
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: mouse => {
-                                if (mouse.button === Qt.RightButton) assistant.open = true
-                                else assistant.run(["toggle"])
-                            }
-                        }
                     }
                 }
 
@@ -535,11 +492,17 @@ ShellRoot {
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
                             onContainsMouseChanged: containsMouse ? bar.hov("clock", clockBox) : pop.cancelHover()
-                            onClicked: { pop.shown = false; nc.open = !nc.open }
+                            acceptedButtons: Qt.LeftButton | Qt.RightButton
+                            onClicked: m => {
+                                if (m.button === Qt.RightButton) { pop.pinned = false; pop.shown = false; nc.open = !nc.open; return }
+                                // clic: calendario junto a la sidebar, fijo hasta volver a hacer clic
+                                if (pop.pinned && pop.kind === "clock") { pop.pinned = false; pop.shown = false }
+                                else { nc.open = false; bar.hov("clock", clockBox); pop.pinned = true }
+                            }
                         }
                     }
 
-                    // Panel de controles (derecha)
+                    // Panel de controles (se abre junto a la sidebar, abajo)
                     Rectangle {
                         anchors.horizontalCenter: parent.horizontalCenter
                         width: 40; height: 40; radius: 20

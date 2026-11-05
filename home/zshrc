@@ -108,7 +108,11 @@ ZSH_THEME="robbyrussell"
 plugins=(git docker zsh-autosuggestions zsh-syntax-highlighting sudo jump)
 
 ZSH_DISABLE_COMPFIX=true   # omite compaudit (más rápido)
-source $ZSH/oh-my-zsh.sh
+if [[ -r $ZSH/oh-my-zsh.sh ]]; then
+  source $ZSH/oh-my-zsh.sh
+else
+  print -P "%F{yellow}oh-my-zsh no está instalado: ejecuta ./install.sh del rice%f"
+fi
 
 # User configuration
 
@@ -139,8 +143,8 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-# direnv
-eval "$(direnv hook zsh)"
+# direnv (solo si está instalado)
+(( $+commands[direnv] )) && eval "$(direnv hook zsh)"
 
 # ── Prompt: Starship (colores del tema vía `rice-theme`, config en ~/.config/starship.toml) ──
 # Volver a robbyrussell: `promptomz` (solo esta terminal) o poner `export RICE_PROMPT=omz` antes de este bloque (permanente).

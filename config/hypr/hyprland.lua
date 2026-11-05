@@ -15,19 +15,15 @@
 ------------------
 
 -- See https://wiki.hypr.land/Configuring/Basics/Monitors/
-hl.monitor({
-    output   = "DP-2", -- LG UltraGear (principal, izquierda)
-    mode     = "2560x1440@144",
-    position = "0x0",
-    scale    = 1,
-})
+-- La disposición de TUS monitores vive en ~/.config/hypr/monitors.lua (install.sh la crea una vez y
+-- nunca la pisa). Aquí solo hay una regla comodín: cualquier pantalla no descrita allí se enciende
+-- con su mejor tasa de refresco, a la derecha de las demás. Así nunca queda una pantalla en negro.
+local HOME = os.getenv("HOME")
+hl.monitor({ output = "", mode = "highrr", position = "auto", scale = 1 })
 
-hl.monitor({
-    output   = "DP-1", -- Samsung (secundario, derecha)
-    mode     = "preferred",
-    position = "2560x0",
-    scale    = 1,
-})
+local ok_mon, MON = pcall(dofile, HOME .. "/.config/hypr/monitors.lua")
+if not ok_mon or type(MON) ~= "table" then MON = {} end
+for _, m in ipairs(MON.rules or {}) do hl.monitor(m) end
 
 
 ---------------------
@@ -37,7 +33,8 @@ hl.monitor({
 -- Set programs that you use
 local terminal    = "kitty"
 local fileManager = "nautilus"
-local menu        = "qs -p @HOME@/.config/quickshell/bar ipc call launcher toggle"
+local qs          = "qs -p " .. HOME .. "/.config/quickshell/bar"
+local menu        = qs .. " ipc call launcher toggle"
 
 
 -------------------
@@ -54,12 +51,10 @@ hl.on("hyprland.start", function ()
   -- y las apps GTK/libadwaita no se enteran del tema oscuro.
   hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP DISPLAY HYPRLAND_INSTANCE_SIGNATURE && systemctl --user start hyprland-session.target")
   hl.exec_cmd("/usr/libexec/polkit-mate-authentication-agent-1")
-  hl.exec_cmd("qs -p ~/.config/quickshell/bar")
-  hl.exec_cmd("~/.config/hypr/scripts/wallpaper.sh apply")
-  -- Spotify en segundo plano (la ventana va a special:spotify, oculta)
-  hl.exec_cmd("/var/lib/snapd/snap/bin/spotify")
-  -- Asistente (Nexora): servicios + ventana oculta, para que SUPER+A responda al instante
-  hl.exec_cmd("~/.config/hypr/scripts/assistant.sh boot >> ~/.cache/nexora-boot.log 2>&1")
+  hl.exec_cmd(qs)
+  hl.exec_cmd(HOME .. "/.config/hypr/scripts/wallpaper.sh apply")
+  -- Spotify en segundo plano (la ventana va a special:spotify, oculta), solo si está instalado
+  hl.exec_cmd("sp=$(command -v spotify || echo /var/lib/snapd/snap/bin/spotify); [ -x \"$sp\" ] && exec \"$sp\"")
 end)
 
 
@@ -285,7 +280,7 @@ hl.device({
 local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 
 -- Bloquear pantalla (SDDM solo hace el login; el bloqueo lo hace hyprlock, con el mismo estilo)
-hl.bind("SUPER + L", hl.dsp.exec_cmd("@HOME@/.config/hypr/scripts/lock.sh"))
+hl.bind("SUPER + L", hl.dsp.exec_cmd(HOME .. "/.config/hypr/scripts/lock.sh"))
 
 -- Example binds, see https://wiki.hypr.land/Configuring/Basics/Binds/ for more
 hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd(terminal))
@@ -297,13 +292,12 @@ hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
 -- Tecla Win sola (toque, al soltar): abre/cierra el dashboard. No se dispara con Win+otra tecla.
-hl.bind("SUPER + SUPER_L", hl.dsp.exec_cmd("qs -p @HOME@/.config/quickshell/bar ipc call dashboard toggle"), { release = true })
-hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("qs -p @HOME@/.config/quickshell/bar ipc call dashboard toggle"))
-hl.bind(mainMod .. " + I", hl.dsp.exec_cmd("qs -p @HOME@/.config/quickshell/bar ipc call settings toggle"))
-hl.bind(mainMod .. " + A", hl.dsp.exec_cmd("@HOME@/.config/hypr/scripts/assistant.sh toggle"))
-hl.bind(mainMod .. " + W", hl.dsp.exec_cmd("qs -p @HOME@/.config/quickshell/bar ipc call widgets edit"))
-hl.bind(mainMod .. " + SHIFT + G", hl.dsp.exec_cmd("qs -p @HOME@/.config/quickshell/bar ipc call gamemode toggle"))
-hl.bind(mainMod .. " + ESCAPE", hl.dsp.exec_cmd("qs -p @HOME@/.config/quickshell/bar ipc call session toggle"))
+hl.bind("SUPER + SUPER_L", hl.dsp.exec_cmd(qs .. " ipc call dashboard toggle"), { release = true })
+hl.bind(mainMod .. " + D", hl.dsp.exec_cmd(qs .. " ipc call dashboard toggle"))
+hl.bind(mainMod .. " + I", hl.dsp.exec_cmd(qs .. " ipc call settings toggle"))
+hl.bind(mainMod .. " + W", hl.dsp.exec_cmd(qs .. " ipc call widgets edit"))
+hl.bind(mainMod .. " + SHIFT + G", hl.dsp.exec_cmd(qs .. " ipc call gamemode toggle"))
+hl.bind(mainMod .. " + ESCAPE", hl.dsp.exec_cmd(qs .. " ipc call session toggle"))
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" }))
@@ -331,25 +325,37 @@ hl.bind(mainMod .. " + ALT + right", hl.dsp.window.swap({ direction = "right" })
 hl.bind(mainMod .. " + ALT + up",    hl.dsp.window.swap({ direction = "up" }))
 hl.bind(mainMod .. " + ALT + down",  hl.dsp.window.swap({ direction = "down" }))
 
--- Virtual desktop groups: group g = workspace g on the LG (DP-2) + workspace g+10 on the Samsung (DP-1)
-local MON_MAIN, MON_SIDE = "DP-2", "DP-1"
+-- Virtual desktop groups: group g = workspace g on the main monitor + workspace g+10 on the side one.
+-- Los nombres salen de monitors.lua (main/side). Si el secundario no existe, los grupos usan solo el principal.
+local function mon_exists(name)
+    if not name then return false end
+    local ok, m = pcall(hl.get_monitor, name)
+    return ok and m ~= nil
+end
+local MON_MAIN, MON_SIDE = MON.main, MON.side
 local GROUPS = 3
 
 for g = 1, GROUPS do
-    hl.workspace_rule({ workspace = tostring(g),      monitor = MON_MAIN, persistent = true, default = (g == 1) })
-    hl.workspace_rule({ workspace = tostring(g + 10), monitor = MON_SIDE, persistent = true, default = (g == 1) })
+    if MON_MAIN then hl.workspace_rule({ workspace = tostring(g),      monitor = MON_MAIN, persistent = true, default = (g == 1) }) end
+    if MON_SIDE then hl.workspace_rule({ workspace = tostring(g + 10), monitor = MON_SIDE, persistent = true, default = (g == 1) }) end
 end
 
 local function clamp_group(g) return math.max(1, math.min(GROUPS, g)) end
 
 local function current_group()
-    local ws = hl.get_monitor(MON_MAIN).active_workspace
-    return ws and ws.id or 1
+    local mon = mon_exists(MON_MAIN) and hl.get_monitor(MON_MAIN) or hl.get_active_monitor()
+    local ws = mon and mon.active_workspace
+    local id = ws and ws.id or 1
+    if id > 10 then id = id - 10 end
+    return clamp_group(id)
 end
+
+local function has_side() return mon_exists(MON_SIDE) and mon_exists(MON_MAIN) end
 
 -- Show group g on both monitors, keeping focus on the monitor you were on
 local function goto_group(g)
     g = clamp_group(g)
+    if not has_side() then hl.dispatch(hl.dsp.focus({ workspace = g })); return end
     local origin = hl.get_active_monitor()
     hl.dispatch(hl.dsp.focus({ workspace = g + 10 }))
     hl.dispatch(hl.dsp.focus({ workspace = g }))
@@ -363,7 +369,7 @@ local function window_to_group(g)
     g = clamp_group(g)
     local win = hl.get_active_window()
     if not win then return end
-    local ws = (win.monitor and win.monitor.name == MON_SIDE) and (g + 10) or g
+    local ws = (has_side() and win.monitor and win.monitor.name == MON_SIDE) and (g + 10) or g
     hl.dispatch(hl.dsp.window.move({ workspace = ws, follow = false }))
     goto_group(g)
     hl.dispatch(hl.dsp.focus({ window = win }))
@@ -449,38 +455,12 @@ hl.window_rule({
 -- })
 -- overlayLayerRule:set_enabled(false)
 
--- Asistente de escritorio (Nexora): recuadro flotante en la esquina inferior derecha del monitor (medidas también en assistant.sh: BOX_W/BOX_H/BOX_MARGIN), en el espacio especial "assistant".
--- SUPER+A (assistant.sh) la muestra fijada (pinned) en el workspace activo, sin quitar el control de las ventanas de abajo; oculta = vuelve a special:assistant.
 hl.window_rule({
     name  = "spotify-background",
     match = { class = "^[Ss]potify$" },
 
     workspace = "special:spotify silent",
 })
-
-hl.window_rule({
-    name  = "nexora-assistant",
-    match = { class = "^chrome-127\\.0\\.0\\.1__-Default$" },
-
-    float     = true,
-    workspace = "special:assistant silent",
-    size      = "400 560",
-    move      = "monitor_w-416 monitor_h-576",
-    rounding  = 14,
-})
-
--- El asistente siempre en su esquina inferior derecha: si se desplazó (p. ej. SUPER+arrastre), vuelve a su sitio al cambiar el foco.
--- (Hyprland no tiene regla para bloquear el movimiento de una ventana; assistant.sh snap compara y solo mueve si hace falta.)
-hl.on("window.active", function()
-    local ok, wins = pcall(hl.get_windows)
-    if not ok or type(wins) ~= "table" then return end
-    for _, w in ipairs(wins) do
-        if w.class == "chrome-127.0.0.1__-Default" and w.pinned then
-            hl.exec_cmd("@HOME@/.config/hypr/scripts/assistant.sh snap")
-            return
-        end
-    end
-end)
 
 -- Hyprland-run windowrule
 hl.window_rule({
@@ -491,4 +471,3 @@ hl.window_rule({
     float = true,
 })
 
--- bind = SUPER, L, exec, hyprlock (desactivado)

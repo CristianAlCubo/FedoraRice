@@ -17,17 +17,18 @@ Scope {
     property string screenName: ""
     property var ws: null
     property bool shown: false
+    property bool pinned: false          // clic en la hora: el calendario no se cierra al salir el ratón
 
     property var _pend: null
-    function hover(k, y, scr, w) { _pend = { k: k, y: y, s: scr, w: w }; hideT.stop(); showT.restart() }
-    function cancelHover() { showT.stop(); hideT.restart() }
+    function hover(k, y, scr, w) { if (pinned && k !== kind) pinned = false; _pend = { k: k, y: y, s: scr, w: w }; hideT.stop(); showT.restart() }
+    function cancelHover() { showT.stop(); if (!pinned) hideT.restart() }
     function enter() { hideT.stop() }
-    function leave() { hideT.restart() }
-    Timer { id: showT; interval: 140
+    function leave() { if (!pinned) hideT.restart() }
+    Timer { id: showT; interval: 60
         onTriggered: { if (!pop._pend) return
             pop.kind = pop._pend.k; pop.anchorY = pop._pend.y; pop.screenName = pop._pend.s
             pop.ws = pop._pend.w ?? null; pop.shown = true } }
-    Timer { id: hideT; interval: 240; onTriggered: pop.shown = false }
+    Timer { id: hideT; interval: 110; onTriggered: { if (!pop.pinned) pop.shown = false } }
 
     // qs ipc call popouts open <volume|clock|window|stats|workspace> <y> | close
     IpcHandler {
@@ -36,7 +37,7 @@ Scope {
             pop.kind = k; pop.anchorY = y; pop.screenName = Hyprland.focusedMonitor?.name ?? ""
             pop.ws = Hyprland.focusedWorkspace; pop.shown = true; hideT.stop()
         }
-        function close(): void { pop.shown = false }
+        function close(): void { pop.pinned = false; pop.shown = false }
     }
 
     Process { id: sh }
@@ -89,34 +90,7 @@ Scope {
 
     Component {
         id: clockC
-        Column {
-            spacing: 10
-            Row {
-                spacing: 12
-                Text { text: Weather.ok ? Weather.glyph : ""; font.family: Theme.mono; font.pixelSize: 46
-                    color: Weather.isDay ? Theme.yellow : Theme.accent2; anchors.verticalCenter: parent.verticalCenter }
-                Column { anchors.verticalCenter: parent.verticalCenter
-                    Text { text: Weather.ok ? Math.round(Weather.temp) + "°C" : "—"; color: Theme.text
-                        font.family: Theme.font; font.pixelSize: 28; font.weight: Font.Medium }
-                    Text { text: Weather.ok ? Weather.desc : "Sin datos"; color: Theme.dim; font.family: Theme.font; font.pixelSize: 12 } }
-            }
-            Text { text: Weather.city; color: Theme.text; font.family: Theme.font; font.pixelSize: 13; font.weight: Font.DemiBold }
-            GridLayout {
-                columns: 2; columnSpacing: 20; rowSpacing: 6
-                visible: Weather.ok
-                Text { text: "Sensación"; color: Theme.dim; font.family: Theme.font; font.pixelSize: 12 }
-                Text { text: Math.round(Weather.feels) + "°C"; color: Theme.text; font.family: Theme.font; font.pixelSize: 12 }
-                Text { text: "Mín / Máx"; color: Theme.dim; font.family: Theme.font; font.pixelSize: 12 }
-                Text { text: Math.round(Weather.lo) + "° / " + Math.round(Weather.hi) + "°"; color: Theme.text; font.family: Theme.font; font.pixelSize: 12 }
-                Text { text: "Humedad"; color: Theme.dim; font.family: Theme.font; font.pixelSize: 12 }
-                Text { text: Weather.humidity + "%"; color: Theme.text; font.family: Theme.font; font.pixelSize: 12 }
-                Text { text: "Viento"; color: Theme.dim; font.family: Theme.font; font.pixelSize: 12 }
-                Text { text: Math.round(Weather.wind) + " km/h"; color: Theme.text; font.family: Theme.font; font.pixelSize: 12 }
-                Text { text: "Lluvia"; color: Theme.dim; font.family: Theme.font; font.pixelSize: 12 }
-                Text { text: Weather.rain + "%"; color: Theme.text; font.family: Theme.font; font.pixelSize: 12 }
-            }
-            Text { text: Qt.formatDateTime(new Date(), "dddd d 'de' MMMM"); color: Theme.dim; font.family: Theme.font; font.pixelSize: 12 }
-        }
+        Calendar { width: 7 * 38; now: new Date() }
     }
 
     Component {
@@ -233,20 +207,21 @@ Scope {
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
             WlrLayershell.namespace: "sidebar-popout"
 
-            Item {
+            SideClip { id: sideClip }
+
+            GrowPanel {
                 id: card
-                x: Theme.sidebarW
-                width: 300
-                height: (body.item ? body.item.implicitHeight : 0) + 28
+                parent: sideClip
+                x: 0
+                panelWidth: 300
+                panelHeight: (body.item ? body.item.implicitHeight : 0) + 28
+                radius: 22
                 readonly property real top0: Theme.frameW + Theme.frameR + Theme.flare
                 y: Math.max(top0, Math.min(win.height - height - top0, pop.anchorY - height / 2))
-                visible: opacity > 0.01
-                opacity: win.mine ? 1 : 0
-                transform: Translate { x: win.mine ? 0 : -24; Behavior on x { Anim { kind: "fastSpatial" } } }
-                Behavior on opacity { NumberAnimation { duration: Theme.dur(90) } }
+                reveal: win.mine ? 1 : 0
+                Behavior on reveal { Anim { kind: "fastSpatial" } }
                 Behavior on y { enabled: win.mine; NumberAnimation { duration: Theme.dur(120); easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.cStandard } }
 
-                Fused { edge: "left"; r: 22 }
                 HoverHandler { onHoveredChanged: hovered ? pop.enter() : pop.leave() }
                 MouseArea { anchors.fill: parent }
 

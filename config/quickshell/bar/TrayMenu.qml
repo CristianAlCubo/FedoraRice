@@ -134,21 +134,21 @@ Scope {
                 Keys.onEscapePressed: { if (tm.stack.length > 0) tm.back(); else tm.close() }
             }
 
-            Rectangle {
+            SideClip { id: sideClip }
+
+            GrowPanel {
                 id: card
-                width: tm.isSteam && tm.stack.length === 0 ? 416 : 270
-                height: col.implicitHeight + 16
-                Behavior on width { Anim { kind: "fastSpatial" } }
-                x: Theme.sidebarW
+                parent: sideClip
+                panelWidth: tm.isSteam && tm.stack.length === 0 ? 416 : 270
+                panelHeight: col.implicitHeight + 16
+                radius: 22
+                Behavior on panelWidth { Anim { kind: "fastSpatial" } }
+                x: 0
                 y: Math.max(Theme.frameW + Theme.frameR + Theme.flare, Math.min(win.height - height - Theme.frameW - Theme.frameR - Theme.flare, tm.anchorX - 24))
-                color: "transparent"
                 property real off: win.visible ? 0 : 1
                 Behavior on off { Anim { kind: "fastSpatial" } }
-                opacity: Math.max(0, Math.min(1, 1 - off * 1.2))
-                transform: Translate { x: -card.off * 60 }
-                Behavior on height { Anim { kind: "fastSpatial" } }
-
-                Fused { edge: "left"; r: 22 }
+                reveal: 1 - off
+                Behavior on panelHeight { Anim { kind: "fastSpatial" } }
 
                 MouseArea { anchors.fill: parent }
 
