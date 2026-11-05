@@ -75,7 +75,7 @@ rota; cada paso comprueba el estado real y repara solo lo que falte.
 | Fase | Qué hace |
 |---|---|
 | 0. Previas | Comprueba Fedora, sudo y red. Registro en `~/.cache/rice-install.log`. |
-| 1. Repos | Activa los COPR `byte0/hyprland` (Hyprland, hyprlock, hyprpaper) y `errornointernet/quickshell`. Cambiables con `HYPR_COPR=… QS_COPR=… ./install.sh`. |
+| 1. Repos | Solo si Hyprland ≥ 0.55 o Quickshell no están ya instalados: prueba COPR candidatos en orden (Hyprland: `ashbuk/Hyprland-Fedora`, `lionheartp/Hyprland`, `nett00n/hyprland`…; Quickshell: `errornointernet/quickshell`, `nett00n/hyprland`) y activa el primero que tenga paquetes para tu Fedora. Forzar uno: `HYPR_COPR=… QS_COPR=… ./install.sh`. |
 | 2. Paquetes | `packages/fedora.txt`: los de `[core]` son obligatorios (si uno falla, se detiene y dice cuál); los de `[extra]` se intentan y se avisa. Verifica Hyprland ≥ 0.55 y lo actualiza si hace falta. |
 | 3. Shell | zsh por defecto; oh-my-zsh + `zsh-autosuggestions` + `zsh-syntax-highlighting` (si una carpeta quedó a medias, se aparta y se reinstala); Starship. |
 | 4. Fuentes y cursor | Rubik, FiraCode Nerd Font Mono, cursor Bibata, Papirus, GTK oscuro. |

@@ -17,8 +17,10 @@ set -uo pipefail
 
 R="$(cd "$(dirname "$0")" && pwd)"
 C="$HOME/.config"
-HYPR_COPR="${HYPR_COPR:-byte0/hyprland}"            # Hyprland ≥ 0.55, hyprlock, hyprpaper…
-QS_COPR="${QS_COPR:-errornointernet/quickshell}"    # Quickshell (no está en los repos oficiales)
+# COPR candidatos, en orden. Solo se usan si el paquete NO está ya instalado; se activa el primero que
+# tenga paquetes para tu versión de Fedora y traiga el paquete. Forzar uno: HYPR_COPR=usuario/repo ./install.sh
+HYPR_COPRS="${HYPR_COPR:-ashbuk/Hyprland-Fedora lionheartp/Hyprland nett00n/hyprland solopasha/hyprland}"
+QS_COPRS="${QS_COPR:-errornointernet/quickshell nett00n/hyprland}"
 HYPR_MIN="0.55"                                     # primera versión con config en Lua
 OS_RELEASE="${RICE_OS_RELEASE:-/etc/os-release}"
 WALL="$HOME/Imágenes/Wallpapers"
@@ -82,7 +84,7 @@ check() {
   c crit "Starship (prompt)"                                  starship_ok
   c crit "~/.zshrc del rice"                                  sh -c "grep -q 'starship init zsh' '$HOME/.zshrc' || [ $KEEPZ = 1 ]"
   c crit "Config de Hyprland (hyprland.lua + monitors.lua + colores)" sh -c "[ -f '$C/hypr/hyprland.lua' ] && [ -f '$C/hypr/monitors.lua' ] && [ -f '$C/hypr/colors.lua' ]"
-  c crit "Config de Quickshell (sin restos del asistente)"    sh -c "[ -f '$C/quickshell/bar/shell.qml' ] && [ ! -e '$C/quickshell/bar/Assistant.qml' ] && [ ! -e '$C/quickshell/shell.qml' ]"
+  c crit "Config de Quickshell"                               test -f "$C/quickshell/bar/shell.qml"
   c crit "Rutas @HOME@ resueltas"                             sh -c "! grep -rIqs '@HOME@' '$C/hypr' '$C/quickshell' '$C/rice' '$C/kitty'"
   c crit "Tema generado (kitty, hyprlock, Starship)"          sh -c "[ -f '$C/kitty/theme.conf' ] && [ -f '$C/hypr/colors.conf' ] && [ -f '$C/starship.toml' ]"
   c crit "Fondo del escritorio disponible"                    sh -c ". '$C/hypr/wallpaper.state' && { [ -f \"$WALL/\$DESKTOP-1440p.png\" ] || [ -f \"$HOME/Videos/Wallpapers/\$DESKTOP-1440p.mp4\" ]; }"
@@ -104,11 +106,6 @@ check() {
   if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
     c opt "Quickshell en marcha en esta sesión"               sh -c 'pgrep -x qs || pgrep -x quickshell'
   fi
-  local n
-  for n in "$C"/systemd/user/nexora-*.service; do
-    [ -e "$n" ] && { warn "Quedan servicios del asistente Nexora en ~/.config/systemd/user (no los toco). Para quitarlos:"
-      echo "      systemctl --user disable --now 'nexora-*' && rm ~/.config/systemd/user/nexora-*.service ~/.config/nexora -r"; break; }
-  done
   CHECK_BAD=$bad
   return 0
 }
@@ -136,15 +133,36 @@ fi
 dl -o /dev/null -I https://github.com 2>/dev/null && ok "Conexión a internet" || warn "No llego a github.com: oh-my-zsh, Starship y el cursor podrían fallar"
 
 # ── 1. Repositorios ──────────────────────────────────────────────────────────
-copr_enabled() { ls /etc/yum.repos.d/ 2>/dev/null | grep -qi "copr.*${1%%/*}:${1##*/}\.repo"; }
+# dnf ignora un repo caído (p. ej. un COPR sin versión para tu Fedora) en vez de abortar todo.
+DNF=(sudo dnf -y --setopt=skip_if_unavailable=True)
+copr_enabled() { local f; for f in /etc/yum.repos.d/_copr*"${1%%/*}:${1##*/}".repo; do [ -f "$f" ] && grep -q '^enabled=1' "$f" && return 0; done; return 1; }
+copr_provides() { [ -n "$(dnf repoquery -q --repo "copr:copr.fedorainfracloud.org:${1%%/*}:${1##*/}" "$2" 2>/dev/null)" ]; }
+hypr_ok() { ver_ge "$(hypr_version)" "$HYPR_MIN" 2>/dev/null && has hyprlock && has hyprpaper; }
+qs_ok() { has qs; }
+ensure_copr() { # ensure_copr <paquete> <función-ya-ok> <candidatos…>: garantiza un repo que traiga el paquete
+  local pkg="$1" okf="$2" repo; shift 2
+  if "$okf"; then ok "$pkg ya instalado: no hace falta COPR"; return 0; fi
+  for repo in "$@"; do copr_enabled "$repo" && copr_provides "$repo" "$pkg" && { ok "$pkg disponible desde COPR $repo (ya activo)"; return 0; }; done
+  for repo in "$@"; do
+    if ! copr_enabled "$repo"; then
+      sudo dnf copr enable -y "$repo" >/dev/null 2>&1 || { echo "  · $repo: sin paquetes para Fedora $FEDORA_VER, se prueba el siguiente"; continue; }
+    fi
+    if copr_provides "$repo" "$pkg"; then ok "COPR $repo activado ($pkg)"; return 0; fi
+    sudo dnf copr disable -y "$repo" >/dev/null 2>&1; echo "  · $repo no trae $pkg, se desactiva"
+  done
+  die "Ningún COPR trae $pkg para Fedora $FEDORA_VER (probados: $*). Indica uno: HYPR_COPR=usuario/repo o QS_COPR=usuario/repo ./install.sh"
+}
 if [ $SYSTEM = 1 ]; then
   say "1/8 Repositorios (COPR)"
+  FEDORA_VER="$(sed -n 's/^VERSION_ID=//p' "$OS_RELEASE" | tr -d '"')"
   if dnf --version 2>/dev/null | grep -qi dnf5; then plug=dnf5-plugins; else plug=dnf-plugins-core; fi
-  rpm -q "$plug" >/dev/null 2>&1 || sudo dnf install -y "$plug" || die "No pude instalar $plug (necesario para 'dnf copr')"
-  for repo in "$HYPR_COPR" "$QS_COPR"; do
-    if copr_enabled "$repo"; then ok "COPR $repo ya activo"
-    else sudo dnf copr enable -y "$repo" && ok "COPR $repo activado" || die "No pude activar el COPR $repo"; fi
-  done
+  rpm -q "$plug" >/dev/null 2>&1 || "${DNF[@]}" install "$plug" || die "No pude instalar $plug (necesario para 'dnf copr')"
+  # Restos de intentos anteriores: un COPR activo que no existe para esta Fedora rompe cada 'dnf'
+  copr_enabled byte0/hyprland && sudo dnf copr disable -y byte0/hyprland >/dev/null 2>&1 && echo "  · desactivado byte0/hyprland (no tiene Fedora $FEDORA_VER)"
+  # shellcheck disable=SC2086
+  ensure_copr hyprland  hypr_ok $HYPR_COPRS
+  # shellcheck disable=SC2086
+  ensure_copr quickshell qs_ok  $QS_COPRS
 fi
 
 # ── 2. Paquetes ──────────────────────────────────────────────────────────────
@@ -156,22 +174,22 @@ if [ $SYSTEM = 1 ]; then
   mapfile -t miss < <(pkg_missing "${CORE[@]}")
   if [ ${#miss[@]} -gt 0 ]; then
     echo "  Faltan: ${miss[*]}"
-    sudo dnf install -y "${miss[@]}" || sudo dnf install -y --refresh "${miss[@]}" || true
+    "${DNF[@]}" install "${miss[@]}" || "${DNF[@]}" install --refresh "${miss[@]}" || true
     mapfile -t miss < <(pkg_missing "${CORE[@]}")
-    [ ${#miss[@]} -eq 0 ] || die "No se pudieron instalar: ${miss[*]}  (¿están activos los COPR $HYPR_COPR y $QS_COPR? prueba: dnf info ${miss[0]})"
+    [ ${#miss[@]} -eq 0 ] || die "No se pudieron instalar: ${miss[*]}  (prueba: dnf info ${miss[0]})"
   fi
   ok "Paquetes imprescindibles instalados (${#CORE[@]})"
   v="$(hypr_version)"
   if ! ver_ge "${v:-0}" "$HYPR_MIN"; then
     echo "  Hyprland ${v:-?} es anterior a $HYPR_MIN (no entiende la config en Lua): actualizando…"
-    sudo dnf upgrade -y --refresh hyprland hyprlock hyprpaper xdg-desktop-portal-hyprland || true
+    "${DNF[@]}" upgrade --refresh hyprland hyprlock hyprpaper xdg-desktop-portal-hyprland || true
     v="$(hypr_version)"
-    ver_ge "${v:-0}" "$HYPR_MIN" || die "Hyprland ${v:-?} < $HYPR_MIN. El COPR $HYPR_COPR no trae una versión con Lua; usa otro: HYPR_COPR=usuario/repo ./install.sh"
+    ver_ge "${v:-0}" "$HYPR_MIN" || die "Hyprland ${v:-?} < $HYPR_MIN. Ningún repo activo trae una versión con Lua; indica un COPR: HYPR_COPR=usuario/repo ./install.sh"
   fi
   ok "Hyprland $v"
   mapfile -t miss < <(pkg_missing "${EXTRA[@]}")
   if [ ${#miss[@]} -gt 0 ]; then
-    sudo dnf install -y --skip-unavailable --skip-broken "${miss[@]}" || true
+    "${DNF[@]}" install --skip-unavailable --skip-broken "${miss[@]}" || true
     mapfile -t miss < <(pkg_missing "${EXTRA[@]}")
     [ ${#miss[@]} -eq 0 ] || warn "Opcionales no disponibles (se sigue sin ellos): ${miss[*]}"
   fi
@@ -210,7 +228,7 @@ else
   if dl -o "$T/s.tgz" "https://github.com/starship/starship/releases/latest/download/starship-$sa.tar.gz" && tar -xzf "$T/s.tgz" -C "$T" starship; then
     install -m755 "$T/starship" "$HOME/.local/bin/starship"
   elif [ $SYSTEM = 1 ]; then
-    sudo dnf copr enable -y atim/starship && sudo dnf install -y starship || true
+    sudo dnf copr enable -y atim/starship && "${DNF[@]}" install starship || true
   fi
   rm -rf "$T"
   starship_ok && ok "Starship instalado" || die "No pude instalar Starship (https://starship.rs)"
@@ -257,8 +275,8 @@ backup() { # backup <ruta>: copia una sola vez por ejecución a $BK
   local dst="$BK/${1#"$HOME"/}"; [ -e "$dst" ] && return 0
   mkdir -p "$(dirname "$dst")"; cp -a "$1" "$dst"
 }
-sync_dir() { # sync_dir <subdir> [--delete]: copia el subdir del repo a ~/.config sin tocar generados ni estado
-  local d="$1" del="${2:-}" f ex=()
+sync_dir() { # sync_dir <subdir>: copia el subdir del repo a ~/.config sin tocar generados, estado ni archivos ajenos
+  local d="$1" del="" f ex=()
   for f in "${GENERATED[@]}" "${STATEFILES[@]}"; do [[ "$f" == "$d/"* ]] && ex+=(--exclude="/${f#"$d"/}"); done
   ex+=(--exclude='*.bak*' --exclude='__pycache__')
   mkdir -p "$C/$d"
@@ -269,9 +287,20 @@ sync_dir() { # sync_dir <subdir> [--delete]: copia el subdir del repo a ~/.confi
     ok "$d actualizado ($(echo "$changes" | wc -l) cambios)"
   else ok "$d ya al día"; fi
 }
-for d in quickshell hypr rice kitty zsh fastfetch git; do sync_dir "$d" --delete; done
-sync_dir systemd/user                     # sin --delete: ahí viven otros servicios tuyos
-rm -f "$C/quickshell/shell.qml"           # demo del asistente que traía la versión anterior
+RICE_DIRS=(quickshell hypr rice kitty zsh fastfetch git systemd/user)
+for d in "${RICE_DIRS[@]}"; do sync_dir "$d"; done
+# Limpieza: solo se borran archivos que instaló el propio rice en una ejecución anterior y que ya no
+# están en el repo (registro en ~/.local/state/rice/manifest). Lo que no instaló el rice no se toca.
+MAN="$HOME/.local/state/rice/manifest"; mkdir -p "$(dirname "$MAN")"
+NEWMAN="$(cd "$STAGE" && for d in "${RICE_DIRS[@]}"; do find "$d" -type f ! -name '*.bak*' ! -path '*__pycache__*'; done | sort)"
+if [ -f "$MAN" ]; then
+  while IFS= read -r f; do
+    [ -n "$f" ] && [ -f "$C/$f" ] || continue
+    printf '%s\n' "${GENERATED[@]}" "${STATEFILES[@]}" | grep -qxF "$f" && continue
+    backup "$C/$f"; rm -f "$C/$f"; echo "  · quitado $f (ya no forma parte del rice)"
+  done < <(comm -23 "$MAN" <(echo "$NEWMAN"))
+fi
+echo "$NEWMAN" > "$MAN"
 # Estado: solo si falta
 [ -f "$C/hypr/monitors.lua" ]     || { cp "$R/templates/monitors.lua" "$C/hypr/monitors.lua"; ok "monitors.lua creado (ajústalo con: hyprctl monitors)"; }
 [ -f "$C/hypr/spotify-api.json" ] || { cp "$R/templates/spotify-api.json" "$C/hypr/spotify-api.json"; chmod 600 "$C/hypr/spotify-api.json"; }
