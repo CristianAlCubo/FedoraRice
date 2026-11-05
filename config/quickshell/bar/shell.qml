@@ -492,7 +492,13 @@ ShellRoot {
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
                             onContainsMouseChanged: containsMouse ? bar.hov("clock", clockBox) : pop.cancelHover()
-                            onClicked: { pop.shown = false; nc.open = !nc.open }
+                            acceptedButtons: Qt.LeftButton | Qt.RightButton
+                            onClicked: m => {
+                                if (m.button === Qt.RightButton) { pop.pinned = false; pop.shown = false; nc.open = !nc.open; return }
+                                // clic: calendario junto a la sidebar, fijo hasta volver a hacer clic
+                                if (pop.pinned && pop.kind === "clock") { pop.pinned = false; pop.shown = false }
+                                else { nc.open = false; bar.hov("clock", clockBox); pop.pinned = true }
+                            }
                         }
                     }
 
